@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 public interface ISave
 {
-    PlayerData PlayerData { get; }
-    void SavePlayerData();
+    PlayerData PlayerData { get; set; }
+    Task SavePlayerData();
     Task LoadPlayerDataAsync();
 }

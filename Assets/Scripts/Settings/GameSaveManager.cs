@@ -8,7 +8,17 @@ using Zenject;
 public class GameSaveManager : ISave, IDisposable
 {
     private string _saveFile;
-    public PlayerData PlayerData { get; private set; }
+    public PlayerData _playerData { get; private set; }
+    public PlayerData PlayerData
+    {
+        get => _playerData;
+        set
+        {
+            _playerData = value;
+           Task.Run(async () => await SavePlayerData());
+        }
+    }
+
     private StreamWriter _writer;
     private StreamReader _reader;
     
@@ -17,6 +27,7 @@ public class GameSaveManager : ISave, IDisposable
     {
         _saveFile = Path.Combine(Application.persistentDataPath, "save.json");
     }
+    
     private ILogger _logger;
 
     [Inject]
@@ -24,16 +35,18 @@ public class GameSaveManager : ISave, IDisposable
     {
         _logger = _ILogger;
     }
-    public void SavePlayerData()
+    public async Task SavePlayerData()
     {
         try
         {
             string json = JsonConvert.SerializeObject(PlayerData, Formatting.Indented);
+			_logger.Log($"JsonWriter = {json}");
+
             using (_writer = new StreamWriter(_saveFile, false))
-            {
-                _writer.WriteLine(json);
-                _writer.Flush();
-            }
+       		{
+            	await _writer.WriteLineAsync(json);
+            	await _writer.FlushAsync();
+      		}
             Debug.Log("Player Succssfully saved!");
         }
         catch (Exception e)
@@ -54,11 +67,11 @@ public class GameSaveManager : ISave, IDisposable
                     PlayerData = JsonConvert.DeserializeObject<PlayerData>(json);
                 }
 
-                Debug.Log("Данные игрока загружены.");
+                Debug.Log("Save loaded");
             }
             else
             {
-                Debug.Log("Файл данных не найден. Создаётся новый.");
+                Debug.Log("Save.json file doesn't exist! Creating new file.");
                 PlayerData = new PlayerData();
             }
         }
@@ -68,32 +81,9 @@ public class GameSaveManager : ISave, IDisposable
             PlayerData = new PlayerData();
         }
     }
-
-    /*public async Task OnApplicationQuitAsync()
-    {
-        await SavePlayerDataAsync();
-        Dispose();
-    }*/
     public void Dispose()
     {
         _writer?.Dispose();
         _reader?.Dispose();
     }
-    
-#if UNITY_EDITOR
-     private void OnApplicationQuit()
-     {
-Debug.Log("Application Quit");
-         SavePlayerData();
-         Dispose();
-     }
-#else
-    private void OnApplicationPause()
-    {Debug.Log("Application Quit");
-
-        SavePlayerData();
-        Dispose();
-    }
-#endif
-
 }

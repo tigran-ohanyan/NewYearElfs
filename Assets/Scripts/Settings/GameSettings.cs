@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using Zenject;
@@ -12,17 +13,18 @@ public class GameSettings : MonoBehaviour
 	public void Construct(ISave _ISave){
 		_save = _ISave;
 		GetSave();
-	}
+        
+    }
+
 	private async void GetSave()
     {
         await _save.LoadPlayerDataAsync();
+        
+        _save.PlayerData.PlayerLevel = 5;
 
         Debug.Log($"Уровень игрока: {_save.PlayerData.PlayerLevel}");
         Debug.Log($"Здоровье игрока: {_save.PlayerData.Health}");
         Debug.Log($"Очки игрока: {_save.PlayerData.Score}");
-
-        // Пример изменений
-        //_saveService.PlayerData.PlayerLevel = 5;
     }
 
     
@@ -62,6 +64,7 @@ public class GameSettings : MonoBehaviour
     public void Construct(ILogger _ILogger)
     {
         _logger = _ILogger;
-        _logger.Log("Tryadaw");
     }
+    
+    
 }

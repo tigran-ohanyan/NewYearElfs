@@ -2,13 +2,17 @@ using UnityEngine;
 using Zenject;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
-public class LoggerManager : ILogger
+public class LoggerManager : ILogger, IDisposable
 {
     private string _logFile;
-    private StreamWriter writer;
+    private StreamWriter _writer;
     private DateTime _dateNow;
+    private readonly object _lock = new object();
+    private CancellationTokenSource _cancellationTokenSource;
+    private Task _loggingTask;
     [Inject]
     public void Construct()
     {
@@ -20,34 +24,74 @@ public class LoggerManager : ILogger
     {
         _logFile = Path.Combine(Application.persistentDataPath, "log.txt");
         Debug.Log(Path.Combine(Application.persistentDataPath, "log.txt"));
+        lock (_lock)
+        {
+            _writer = new StreamWriter(_logFile, true);
+        }
+
+        LoggerInOtherThread();
+    }
+
+    private void LoggerInOtherThread()
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+        var token = _cancellationTokenSource.Token;
+
+        _loggingTask = Task.Run(async () =>
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(1000);
+            }
+        }, token);
     }
 
     private void SaveLogFile()
     {
-        writer.Close();
+        lock (_lock)
+        {
+            if (_writer != null)
+            {
+                _writer.Close();
+                _writer.Dispose();
+            }
+        }
     }
     public void Log(string message)
     {
-        WriteToFile(message).ContinueWith(_ => OpenLogFile());
+        
+        WriteToFile(message);
     }
-    private async Task WriteToFile(string text)
+    private void WriteToFile(string message)
     {
-        try
+        Task.Run(() =>
         {
-            using (writer = new StreamWriter(_logFile, true))
+            lock (_lock)
             {
-                await writer.WriteLineAsync(_dateNow + " - " + text);
-                writer.Flush();
+                try
+                {
+                    _writer.WriteLine($"{_dateNow} - {message}");
+                    _writer.WriteLine($"Current Thread ID: {Thread.CurrentThread.ManagedThreadId}");
+                    _writer.Flush();
+                }
+                catch (IOException e)
+                {
+                    Debug.LogError($"WriteToFile() can't worked: {e.Message}");
+                }
             }
-        }
-        catch (IOException e)
-        {
-            Debug.LogError($"Ошибка записи: {e.Message}");
-        }
+        });
     }
     public void LogErrors(string message)
     {
-        WriteToFile("ERROR - " + message).ContinueWith(_ => OpenLogFile());
+        WriteToFile("ERROR - " + message);
+    }
+    
+    public void Dispose()
+    {
+        SaveLogFile();
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _loggingTask?.Dispose();
     }
 #if UNITY_EDITOR
      void OnApplicationQuit()
