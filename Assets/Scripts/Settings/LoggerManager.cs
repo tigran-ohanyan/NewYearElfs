@@ -11,8 +11,8 @@ public class LoggerManager : ILogger, IDisposable
     private StreamWriter _writer;
     private DateTime _dateNow;
     private readonly object _lock = new object();
-    private CancellationTokenSource _cancellationTokenSource;
-    private Task _loggingTask;
+   /* private CancellationTokenSource _cancellationTokenSource;
+    private Task _loggingTask; */
     [Inject]
     public void Construct()
     {
@@ -29,9 +29,9 @@ public class LoggerManager : ILogger, IDisposable
             _writer = new StreamWriter(_logFile, true);
         }
 
-        LoggerInOtherThread();
+        //LoggerInOtherThread();
     }
-
+    /* TO DELETE 
     private void LoggerInOtherThread()
     {
         _cancellationTokenSource = new CancellationTokenSource();
@@ -44,7 +44,7 @@ public class LoggerManager : ILogger, IDisposable
                 await Task.Delay(1000);
             }
         }, token);
-    }
+    } */
 
     private void SaveLogFile()
     {
@@ -89,20 +89,11 @@ public class LoggerManager : ILogger, IDisposable
     public void Dispose()
     {
         SaveLogFile();
-        _cancellationTokenSource?.Cancel();
+		_writer?.Dispose();
+       /* _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
-        _loggingTask?.Dispose();
+        _loggingTask?.Dispose(); */
     }
-#if UNITY_EDITOR
-     void OnApplicationQuit()
-     {
-         SaveLogFile();
-     }
-#else
-    void OnApplicationPause()
-    {
-        SaveLogFile();
-    }
-#endif
+
 
 }
