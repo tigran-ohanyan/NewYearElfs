@@ -1,0 +1,46 @@
+{
+    "name": "InputController",
+    "maps": [
+        {
+            "name": "Main",
+            "id": "4e52e1e7-356a-470b-a9db-88701e899580",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "744e073e-9cbc-4664-b2f4-48f1db6ce31d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "2d2409bf-e2a3-4f9a-9128-719e843bb395",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Desktop",
+            "bindingGroup": "Desktop",
+            "devices": [
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}

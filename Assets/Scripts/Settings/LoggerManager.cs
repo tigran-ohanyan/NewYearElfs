@@ -11,8 +11,6 @@ public class LoggerManager : ILogger, IDisposable
     private StreamWriter _writer;
     private DateTime _dateNow;
     private readonly object _lock = new object();
-   /* private CancellationTokenSource _cancellationTokenSource;
-    private Task _loggingTask; */
     [Inject]
     public void Construct()
     {
@@ -28,24 +26,7 @@ public class LoggerManager : ILogger, IDisposable
         {
             _writer = new StreamWriter(_logFile, true);
         }
-
-        //LoggerInOtherThread();
     }
-    /* TO DELETE 
-    private void LoggerInOtherThread()
-    {
-        _cancellationTokenSource = new CancellationTokenSource();
-        var token = _cancellationTokenSource.Token;
-
-        _loggingTask = Task.Run(async () =>
-        {
-            while (!token.IsCancellationRequested)
-            {
-                await Task.Delay(1000);
-            }
-        }, token);
-    } */
-
     private void SaveLogFile()
     {
         lock (_lock)
@@ -89,10 +70,7 @@ public class LoggerManager : ILogger, IDisposable
     public void Dispose()
     {
         SaveLogFile();
-		_writer?.Dispose();
-       /* _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _loggingTask?.Dispose(); */
+        _writer?.Dispose();
     }
 
 

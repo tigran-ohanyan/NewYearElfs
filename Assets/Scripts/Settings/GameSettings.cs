@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 public class GameSettings : MonoBehaviour
@@ -44,7 +45,6 @@ public class GameSettings : MonoBehaviour
         }else{
             _audioSettings.EnableGroup(groupParameter);
             EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite = _enabledSounds;
-
         }
     }
 	
@@ -55,7 +55,6 @@ public class GameSettings : MonoBehaviour
     public void Construct(ICache _ICache)
     {
         _cache = _ICache;
-        Debug.Log($"Player level = " + _cache.Level);
     }
     
     private ILogger _logger;

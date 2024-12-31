@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 using Cysharp.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
 public class SceneLoadButton : MonoBehaviour
 {
@@ -25,7 +26,6 @@ public class SceneLoadButton : MonoBehaviour
 
     private void Start()
     {
-        
         if (button != null)
         {
             button.onClick.RemoveAllListeners();
@@ -35,11 +35,16 @@ public class SceneLoadButton : MonoBehaviour
 
     private async void OnButtonClick()
     {
-        Debug.LogError($"SceneID = {_save.PlayerData.SceneID}");
         sceneID = _save.PlayerData.SceneID;
-        if (sceneID >= 0)
+        if (sceneID == SceneManager.GetActiveScene().buildIndex)
+        {
+            await _sceneLoader.LoadSceneAsync(0);
+            _save.PlayerData.SceneID = 0;
+        }
+        else if (sceneID > 0)
         {
             await _sceneLoader.LoadSceneAsync(sceneID);
+            _save.PlayerData.SceneID = sceneID;
         }
         else
         {

@@ -40,14 +40,13 @@ public class GameSaveManager : ISave, IDisposable
         try
         {
             string json = JsonConvert.SerializeObject(PlayerData, Formatting.Indented);
-			_logger.Log($"JsonWriter = {json}");
 
             using (_writer = new StreamWriter(_saveFile, false))
        		{
             	await _writer.WriteLineAsync(json);
             	await _writer.FlushAsync();
       		}
-            Debug.Log("Player Succssfully saved!");
+            _logger.Log("Player Succssfully saved!");
         }
         catch (Exception e)
         {
@@ -67,11 +66,11 @@ public class GameSaveManager : ISave, IDisposable
                     PlayerData = JsonConvert.DeserializeObject<PlayerData>(json);
                 }
 
-                Debug.Log("Save loaded");
+                _logger.Log("Save loaded");
             }
             else
             {
-                Debug.Log("Save.json file doesn't exist! Creating new file.");
+                _logger.Log("Save.json file doesn't exist! Creating new file.");
                 PlayerData = new PlayerData();
             }
         }
